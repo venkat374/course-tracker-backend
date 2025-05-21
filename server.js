@@ -6,8 +6,23 @@ require('dotenv').config(); // Load environment variables from .env file
 const app = express();
 const port = process.env.PORT || 5000; // Use port from .env or default to 5000
 
+const allowedOrigins = [
+    'http://localhost:3000',
+];
+
 // Middleware
-app.use(cors()); // Enable CORS for all routes
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true); // Allow requests with no origin (e.g., Postman)
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true // Important if you use cookies or send authorization headers
+}));
+
 app.use(express.json()); // Parse JSON request bodies
 
 // MongoDB Connection
